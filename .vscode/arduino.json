@@ -1,0 +1,6 @@
+{
+    "board": "arduino:avr:nano",
+    "port": "/dev/tty.usbserial-141340",
+    "sketch": "volleyball.ino",
+    "configuration": "cpu=atmega328"
+}
