@@ -2,13 +2,14 @@
 #define _PLAYER_H 
 
 #include "Arduino.h"
+#include "PositionClass.h"
+
 class Player {
     private:
         byte *_bounderies;
+        Position *position;
 
     protected:
-        byte _x;
-        byte _y;
         CRGB _color;
         Player *_teamPlayer;
         void setPosition(byte x, byte y);
@@ -25,6 +26,9 @@ class Player {
 
 // Member functions definitions including constructor
 Player::Player() {
+    position = new Position(0,0);
+    //Position p(0,0);
+    //position = &p;
 }
 
 void Player::setTeamPlayer(Player *teamPlayer) {
@@ -32,8 +36,8 @@ void Player::setTeamPlayer(Player *teamPlayer) {
 }
 
 void Player::setPosition(byte x, byte y) {
-    _x = x;
-    _y = y;
+    position->setX(x);
+    position->setY(y);
 }
 
 void Player::setMovementBounderis(byte *bounderies) {
@@ -41,11 +45,11 @@ void Player::setMovementBounderis(byte *bounderies) {
 }
 
 byte Player::getX(void) {
-    return _x;
+    return position->getX();
 }
 
 byte Player::getY(void) {
-    return _y;
+    return position->getY();
 }
 
 CRGB Player::getColor(void) {
@@ -63,36 +67,36 @@ void Player::move(void){
     //Serial.println(top);
     //Serial.println(bottom);
 
-    byte prepXOne = _x;
-    byte prepXTwo = _x;
+    byte prepXOne = position->getX();
+    byte prepXTwo = position->getX();
     byte newX = byte(random(prepXOne - 1, prepXTwo + 2));
     if (newX < left) {
         //Serial.println("X too low");
         //Serial.println(newX);
         //Serial.println("---");
-        newX = _x; 
+        newX = position->getX(); 
     }
     if (newX > right) {
         //Serial.println("X too high");
         //Serial.println(newX);
         //Serial.println("---");
-        newX = _x;
+        newX = position->getX();
     }
     
-    byte prepYOne = _y;
-    byte prepYTwo = _y;
+    byte prepYOne = position->getY();
+    byte prepYTwo = position->getY();
     byte newY = byte(random(prepYOne - 1, prepYTwo + 2));
     if (newY < top) {
         //Serial.println("Y too low");
         //Serial.println(newY);
         //Serial.println("---");
-        newY = _y;
+        newY = position->getY();
     }
     if (newY > bottom) {
         //Serial.println("Y too high");
         //Serial.println(newY);
         //Serial.println("---");
-        newY = _y;
+        newY = position->getY();
     }
     Player::setPosition(newX, newY);
     //Serial.println("New position");

@@ -2,74 +2,148 @@
 #define _BALL_H 
 
 #include "Arduino.h"
+
+
 class Ball {
     private:
         const CRGB _color = 0xFFFF00;
         const byte bounderies[4] = {0,17,0,8};
+        bool hasDestiantionToFlyTo;
+        byte FIELD_LENGTH;
+        byte FIELD_HEIGHT;
 
-    protected:
-        byte _startX;
-        byte _startY;
-        byte _destinationX;
-        byte _destinationY;
-        byte _currentX;
-        byte _currentY;
+        Position *startPosition;
+        Position *currentPosition;
+        Position *destinationPosition;
+        //byte flightPath[];
+        void calculateFlightPath(void);
     public:
         //virtual ~Player(){};
-        Ball();
-        void setStartPosition(byte x, byte y);
-        void setDestinationPosition(byte x, byte y);
-        byte getStartX();
-        byte getStartY();
-        byte getDestinationX();
-        byte getDestinationY();
-        byte getCurrentX();
-        byte getCurrentY();
+        Ball(byte l, byte h);
+        void setStart(byte x, byte y);
+        void setDestination(byte x, byte y);
+        void setRandomDestination(bool serve_from_blue_team);
+        Position getStart(void);
+        Position getDestination(void);
+        Position getCurrent(void);
         CRGB getColor();
         void fly();
 };
 
 // Member functions definitions including constructor
-Ball::Ball() {
+Ball::Ball(byte l, byte h) {
+    hasDestiantionToFlyTo = false;
+    FIELD_LENGTH = l;
+    FIELD_HEIGHT = h;
+    this->startPosition = new Position(0,0);
+    this->currentPosition = new Position(0,0);
+    this->destinationPosition = new Position(0,0);
 }
 
-void Ball::setStartPosition(byte startX, byte startY) {
-    _startX = startX;
-    _currentX = startX;
-    _startY = startY;
-    _currentY = startY;
+void Ball::setStart(byte x, byte y) {
+    this->startPosition->setX(x);
+    this->startPosition->setY(y);
+    this->currentPosition->setX(x);
+    this->currentPosition->setY(y);
 }
 
-byte Ball::getStartX(void) {
-    return _startX;
+Position Ball::getStart(void) {
+    return startPosition;
 }
 
-byte Ball::getStartY(void) {
-    return _startY;
+void Ball::setDestination(byte x, byte y) {
+    this->destinationPosition->setX(x);
+    this->destinationPosition->setY(y);
 }
 
-byte Ball::getDestinationX(void) {
-    return _destinationX;
+Position Ball::getDestination(void) {
+    return destinationPosition;
 }
 
-byte Ball::getDestinationY(void) {
-    return _destinationY;
-}
-
-byte Ball::getCurrentX(void) {
-    return _currentX;
-}
-
-byte Ball::getCurrentY(void) {
-    return _currentY;
+Position Ball::getCurrent(void) {
+    return currentPosition;
 }
 
 CRGB Ball::getColor(void) {
     return _color;
 }
 
-void Ball::fly(void){
-    
+void Ball::fly(){
+    if (hasDestiantionToFlyTo){
+        
+    }
+}
+
+void Ball::setRandomDestination(bool serve_from_blue_team) {
+    if (hasDestiantionToFlyTo == true) {
+        return;
+    }
+    byte randomDestinationX = 0;
+    byte randomDestinationY = 0;
+    if (serve_from_blue_team) {
+        randomDestinationX =  byte(
+                            random(
+                                FIELD_LENGTH/2, 
+                                FIELD_LENGTH
+                                )
+                            );
+         randomDestinationY = byte(
+                            random(
+                                0, 
+                                FIELD_HEIGHT
+                                )
+                            );
+    } else {
+        randomDestinationX = byte(
+                            random(
+                                0, 
+                                FIELD_LENGTH/2
+                                )
+                            ); 
+         randomDestinationY = byte(
+                            random(
+                                0, 
+                                FIELD_HEIGHT
+                                )
+                            );
+    }
+    destinationPosition->setX(randomDestinationX);
+    destinationPosition->setY(randomDestinationY);
+    calculateFlightPath();
+    hasDestiantionToFlyTo = true;
+}
+
+void Ball::calculateFlightPath() {
+    Serial.print("destination: ");
+    Serial.println(getDestination().toString());
+    Serial.print("current: ");
+    Serial.println(getCurrent().toString());
+    byte diffX = abs(getDestination().getX() - getCurrent().getX());
+    Serial.print("diffX: ");
+    Serial.println(diffX);
+    byte diffY = abs(getDestination().getY() - getCurrent().getY());
+    Serial.print("diffY: ");
+    Serial.println(diffY);
+    byte flightPoints = max(diffX, diffY);
+    Serial.print("flightPoints: ");
+    Serial.println(flightPoints);
+
+    float xToYRation;
+    if (diffX == 0 || diffY == 0) {
+        xToYRation = 0;
+    } else if (diffX > diffY) {
+        xToYRation = float(diffX) / float(diffY);
+    } else {
+        xToYRation = float(diffY) / float(diffX);
+    }
+    Serial.print("xToYRation: ");
+    Serial.println(xToYRation);
+
+    byte flightPath[flightPoints][2];
+    for(byte flightPointIndex = 0; flightPointIndex < flightPoints; flightPointIndex++) {
+        byte flightPoint[2] = {0,1};
+        //flightPath[flightPointIndex] = flightPoint;
+    }
 }
 
 #endif

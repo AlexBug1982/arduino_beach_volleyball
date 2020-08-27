@@ -23,8 +23,6 @@ const long PLAY_FIELD[] PROGMEM =
 0xb4864d, 0xb4864d, 0xb4864d, 0xb4864d, 0xb4864d, 0xb4864d, 0xb4864d, 0xb4864d, 0xb4864d, 0xb4864d, 0xb4864d, 0xb4864d, 0xb4864d, 0xb4864d, 0xb4864d, 0xb4864d, 0xb4864d, 0xb4864d
 };
 
-
-
 #define FIELD_LENGTH 18
 #define FIELD_HEIGHT 9
 
@@ -36,7 +34,7 @@ BluePlayer player_blue_two = BluePlayer(6,5);
 RedPlayer player_red_one = RedPlayer(12,4);
 RedPlayer player_red_two = RedPlayer(11,2);
 
-Ball ball = Ball();
+Ball ball = Ball(FIELD_LENGTH, FIELD_HEIGHT);
 
 Player players[4];
 
@@ -47,6 +45,9 @@ void setup() {
   Serial.begin(9600);//Initialization of Serial Port
   FastLED.addLeds<NEOPIXEL,DATA_PIN>(leds, NUM_LEDS);  // Init of the Fastled library
   FastLED.setBrightness(15);
+
+  unsigned long time = micros();
+  randomSeed(time);
 
   players[0] = player_blue_one;
   player_blue_one.setTeamPlayer(&player_blue_two);
@@ -60,6 +61,7 @@ void setup() {
   delay(1000);
   defineStartTeam();
   delay(1000);
+
 }
 
 void loop() {
@@ -78,16 +80,14 @@ void loop() {
       }
     }
 
-
-    defineStartTeam();
-    byte bX = ball.getCurrentX();
-    byte bY = ball.getCurrentY();
+    ball.fly();
+    byte bX = ball.getCurrent().getX();
+    byte bY = ball.getCurrent().getX();
     byte ballLedPos = getLEDpos(bX, bY);
     if (ledIndex == ballLedPos)
-      {
-        ledColor = ball.getColor();
-      }
-
+    {
+      ledColor = ball.getColor();
+    }
 
     leds[ledIndex] = ledColor;
   }
@@ -97,26 +97,19 @@ void loop() {
     players[pMoveIndex] = playerToMove;
   }
   FastLED.show();
-  delay(10);
+  delay(500);
 }
 
 void defineStartTeam() {
   byte r = byte(random(2));
-  Serial.println(r);
-  if (r == 0 ) {
-    ball.setStartPosition(0, 6);
+  if (r == 0 ) { 
+    //blue
+    ball.setStart(0, 6);
+    ball.setRandomDestination(true);
   } else {
-    ball.setStartPosition(17, 2);
-  }
-}
-
-int getRandomOppositeBallDestination(bool is_blue_team) {
-  if (is_blue_team) {
-    byte myArray[] = {byte(random(0, FIELD_LENGTH/2)), byte(random(0, FIELD_HEIGHT))};
-    return myArray;
-  } else {
-    byte myArray[] = {byte(random(FIELD_LENGTH, FIELD_LENGTH)), byte(random(0, FIELD_HEIGHT))};
-    return myArray;
+    //red
+    ball.setStart(17, 2);
+    ball.setRandomDestination(false);
   }
 }
 
